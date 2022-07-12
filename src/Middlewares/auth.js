@@ -26,18 +26,6 @@ const authentication = async (req, res, next) => {
         next();
       }
     );
-
-    //Method-2
-    // const decodedToken = jwt.verify(
-    //   token,
-    //   "thisIsTheSecretKeyForToken(@#$%^&*)",{ignoreExpiration: true}
-    // );
-
-    //Method-3
-    //!!(401) if(exp > currentTime(Date.now)).
-    //IF User Authenticateded then Call <next()>.
-    // req.decodedToken = decodedToken;
-    // next();
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -80,10 +68,6 @@ const authorisation = async (req, res, next) => {
 
       //Find Books with <filter>.
       const bookFound = await booksModel.findOne({ _id: req.params.bookId });
-      // const bookFound = await booksModel.findOne({
-      //   _id: req.params.bookId,
-      //   isDeleted: false,
-      // });
 
       //Error: NO Books Found.
       if (!bookFound) {

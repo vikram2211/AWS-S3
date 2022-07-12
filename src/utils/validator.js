@@ -30,10 +30,6 @@ const isValidRating = function (value) {
   return /^[1-5]$/.test(value);
 };
 
-const isNumber = function (value) {
-  return isNan(value);
-};
-
 const isValidReview = function (value) {
   if (typeof value !== "string" || value === null) return false;
   if (typeof value === "string" && value.trim().length === 0) return false;
@@ -52,7 +48,6 @@ module.exports = {
   isValidTitle,
   isValidRequestBody,
   isValidRating,
-  isNumber,
   isValidReview,
   isValidDate,
 };

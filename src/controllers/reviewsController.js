@@ -24,7 +24,7 @@ const createReview = async (req, res) => {
     const book = await booksModel.findOne({ _id: bookId, isDeleted: false });
     if (!book) {
       return res
-        .status(400)
+        .status(404)
         .send({ status: false, message: "Book NOT Found." });
     }
 
@@ -35,14 +35,6 @@ const createReview = async (req, res) => {
       return res.status(400).json({
         status: false,
         message: "Invalid Request. Please input data in the body.",
-      });
-    }
-
-    if (requestBody.isDeleted == true || requestBody.isDeleted == "true") {
-      return res.status(400).json({
-        status: false,
-        message:
-          "Invalid Request: <isDeleted : true>. Cannot Create and Delete Review at the same time.",
       });
     }
 

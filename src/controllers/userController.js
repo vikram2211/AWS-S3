@@ -21,18 +21,19 @@ const createUser = async (req, res) => {
 
     const { title, name, phone, email, password, address } = requestBody;
 
-    //ADDRESS Validation(Correct Format - if Present ).
-    if (typeof address === "string") {
+    //ADDRESS Validation(Correct Format(OBJECT) - if Present ).
+    if (typeof address === "string" || address === null || address === false) {
       return res.status(400).json({
         status: false,
-        message: "Fill the ADDRESS in correct Format (as an <Object>).",
+        message: "Fill the ADDRESS in correct Format (as an <OBJECT>).",
       });
     }
     if (address) {
       if (Object.keys(address).length === 0) {
         return res.status(400).json({
           status: false,
-          message: "Invalid ADDRESS. Please fill ADDRESS in the body.",
+          message:
+            "Invalid ADDRESS. Please enter <STREET> ,<CITY> & <PINCODE> of ADDRESS(<OBJECT>).",
         });
       }
     }
@@ -123,11 +124,11 @@ const createUser = async (req, res) => {
           .status(400)
           .send({ status: false, message: "Please enter a Valid STREET." });
       }
-      if (!/^[a-zA-Z0-9\/\- ]*$/.test(street)) {
+      if (!/^[a-zA-Z0-9\/\-\, ]*$/.test(street)) {
         return res.status(400).send({
           status: false,
           message:
-            "STREET can be Alphabets, Hyphen(-), Forward-slash(/), Numbers & White-space(s) ONLY.",
+            "STREET can be Alphabets, Hyphen(-), Forward-slash(/), Comma(,), Numbers & White-space(s) ONLY.",
         });
       }
       if (!validator.isValidString(city)) {

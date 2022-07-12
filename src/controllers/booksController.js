@@ -27,13 +27,7 @@ const createBook = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Please enter a Valid UserID." });
     }
-    //////cHECK (also in authorisation).
-    // if (!validator.isValidObjectId(userId)) {
-    //   return res.status(400).send({
-    //     status: false,
-    //     message: "UserID NOT a Valid Mongoose ObjectId.",
-    //   });
-    // }
+
     const isUserIdRegistered = await userModel.findById(userId);
     if (!isUserIdRegistered) {
       return res
@@ -163,7 +157,11 @@ const createBook = async (req, res) => {
     const bookData = await booksModel.create(requestBody);
     return res
       .status(201)
-      .send({ status: true, message: "Success", requestBody: bookData });
+      .send({
+        status: true,
+        message: "Book Successfully Created.",
+        requestBody: bookData,
+      });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -209,7 +207,6 @@ const getBooks = async (req, res) => {
     }
 
     let filter = {};
-    filter.isDeleted = false;
 
     if (userId && category && subcategory) {
       filter = { userId, category, subcategory };
@@ -232,6 +229,9 @@ const getBooks = async (req, res) => {
           "Invalid Query: Enter  <userId>, <category> OR <subcategory>. ",
       });
     }
+
+    filter.isDeleted = false;
+
     //Find Books with <filter>.
     const allBooks = await booksModel
       .find(filter)
@@ -313,18 +313,6 @@ const getBookById = async (req, res) => {
 const updateBookById = async (req, res) => {
   try {
     const bookId = req.params.bookId;
-
-    // if (!bookId)
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "BookId NOT Provided." });
-
-    // if (!validator.isValidObjectId(bookId)) {
-    //   return res.status(400).send({
-    //     status: false,
-    //     message: "BookID NOT a Valid Mongoose ObjectId.",
-    //   });
-    // }
 
     //Find Book by <bookId>.
     let searchBook = await booksModel.findOne({
@@ -453,13 +441,6 @@ const updateBookById = async (req, res) => {
 const deleteBookById = async (req, res) => {
   try {
     const bookId = req.params.bookId;
-
-    // if (!validator.isValidObjectId(bookId)) {
-    //   return res.status(400).send({
-    //     status: false,
-    //     message: "BookID NOT a Valid Mongoose ObjectId.",
-    //   });
-    // }
 
     //Find Book by <bookId>.
     let bookDeleted = await booksModel.findOneAndUpdate(
