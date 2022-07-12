@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-// const userModel = require("../models/userModel");
 const booksModel = require("../models/booksModel");
 const validator = require("../utils/validator");
 
@@ -16,11 +15,6 @@ const authentication = async (req, res, next) => {
         .send({ status: false, message: "Token must be present." });
     }
 
-    // const decodedToken = jwt.verify(
-    //   token,
-    //   "thisIsTheSecretKeyForToken(@#$%^&*)",{ignoreExpiration: true}
-    // );
-
     jwt.verify(
       token,
       "thisIsTheSecretKeyForToken(@#$%^&*)",
@@ -33,14 +27,14 @@ const authentication = async (req, res, next) => {
       }
     );
 
-    // console.log(decodedToken);
-    // if (!decodedToken) {
-    //   return res.status(401).send({ status: false, message: "Invalid Token." });
-    // }
+    //Method-2
+    // const decodedToken = jwt.verify(
+    //   token,
+    //   "thisIsTheSecretKeyForToken(@#$%^&*)",{ignoreExpiration: true}
+    // );
 
+    //Method-3
     //!!(401) if(exp > currentTime(Date.now)).
-    // console.log(decodedToken);
-
     //IF User Authenticateded then Call <next()>.
     // req.decodedToken = decodedToken;
     // next();
@@ -55,14 +49,6 @@ const authentication = async (req, res, next) => {
 
 const authorisation = async (req, res, next) => {
   try {
-    // const token = req.headers["x-api-key"];
-    // const decodedToken = jwt.verify(
-    //   token,
-    //   "thisIsTheSecretKeyForToken(@#$%^&*)"
-    // );
-
-    // console.log(req.decodedToken);
-
     //Validation - If Request-Body has <userId>.
     if (req.body.userId) {
       //Validate that <userId> is a Valid Mongoose ObjectId.

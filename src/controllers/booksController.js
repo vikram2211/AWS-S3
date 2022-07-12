@@ -1,7 +1,7 @@
 const booksModel = require("../models/booksModel");
 const userModel = require("../models/userModel");
-const validator = require("../utils/validator");
 const reviewsModel = require("../models/reviewsModel");
+const validator = require("../utils/validator");
 
 /*--------------------------------------------------------------------------------*/
 //                            1. API - Create a Book.
@@ -27,12 +27,13 @@ const createBook = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Please enter a Valid UserID." });
     }
-    if (!validator.isValidObjectId(userId)) {
-      return res.status(400).send({
-        status: false,
-        message: "UserID NOT a Valid Mongoose ObjectId.",
-      });
-    }
+    //////cHECK (also in authorisation).
+    // if (!validator.isValidObjectId(userId)) {
+    //   return res.status(400).send({
+    //     status: false,
+    //     message: "UserID NOT a Valid Mongoose ObjectId.",
+    //   });
+    // }
     const isUserIdRegistered = await userModel.findById(userId);
     if (!isUserIdRegistered) {
       return res
@@ -61,11 +62,6 @@ const createBook = async (req, res) => {
     }
 
     //ISBN Validation.
-    // if (!validator.isValidString(ISBN)) {
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "Invalid ISBN." });
-    // }
     if (!validator.isValidISBN(ISBN)) {
       return res.status(400).send({
         status: false,
@@ -178,8 +174,7 @@ const createBook = async (req, res) => {
 /*--------------------------------------------------------------------------------*/
 const getBooks = async (req, res) => {
   try {
-    // console.log(req.body);
-
+    //Object Destructuring.
     const { userId, category, subcategory } = req.query;
 
     if (Object.keys(req.query).length === 0) {
@@ -276,11 +271,6 @@ const getBookById = async (req, res) => {
   try {
     const bookId = req.params.bookId;
 
-    // if (!bookId) {
-    //   return res
-    //     .status(400)
-    //     .send({ status: false, message: "BookId NOT given in Params." });
-    // }
     if (!validator.isValidObjectId(bookId)) {
       return res.status(400).send({
         status: false,
@@ -358,6 +348,7 @@ const updateBookById = async (req, res) => {
 
     const { title, excerpt, ISBN, releasedAt } = requestBody;
 
+    // If No Required key present in Body for Updation.
     if (!(title || excerpt || ISBN || releasedAt)) {
       return res.status(400).json({
         status: false,
@@ -410,21 +401,7 @@ const updateBookById = async (req, res) => {
       }
     }
 
-    //Same checkUnique...............
-    // if (
-    //   requestBody.hasOwnProperty("title") ||
-    //   requestBody.hasOwnProperty("ISBN")
-    // ) {
-    //   let checkTitleAndIsbn = await booksModel.findOne({
-    //     $or: [{ title: requestBody.title }, { ISBN: requestBody.ISBN }],
-    //   });
-    //   if (checkTitleAndIsbn)
-    //     return res
-    //       .status(400)
-    //       .send({ status: false, message: "<Title> or <ISBN> already exist." });
-    // }
-
-    //Different checkUnique...............
+    // Error-Check for Unique TITLE.
     if (requestBody.hasOwnProperty("title")) {
       let checkTitle = await booksModel.findOne({
         title: requestBody.title,
@@ -434,6 +411,8 @@ const updateBookById = async (req, res) => {
           .status(400)
           .send({ status: false, message: "<Title> already exist." });
     }
+
+    // Error-Check for Unique ISBN.
     if (requestBody.hasOwnProperty("ISBN")) {
       let checkIsbn = await booksModel.findOne({
         ISBN: requestBody.ISBN,
@@ -443,8 +422,8 @@ const updateBookById = async (req, res) => {
           .status(400)
           .send({ status: false, message: "<ISBN> already exist." });
     }
-    //........................
 
+    // Update fields(s) in Book.
     let changeDetails = await booksModel.findOneAndUpdate(
       { _id: bookId },
       {
@@ -455,6 +434,8 @@ const updateBookById = async (req, res) => {
       },
       { new: true }
     );
+
+    // Successful Response.
     res.status(200).send({
       status: true,
       message: "Successfully updated book details.",
