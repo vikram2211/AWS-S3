@@ -1,4 +1,3 @@
-// const mongoose = require("mongoose");
 const reviewsModel = require("../models/reviewsModel");
 const booksModel = require("../models/booksModel");
 const validator = require("../utils/validator");
@@ -91,9 +90,12 @@ const createReview = async (req, res) => {
     //Create Review.
     const reviewCreated = await reviewsModel.create(requestBody);
 
+    //Show Book-document with created Review.
+    const finalData = { ...incReviewsCount.toObject(), reviewsData: reviewCreated };
+
     return res
       .status(201)
-      .send({ status: true, message: "Success", data: reviewCreated });
+      .send({ status: true, message: "Created Review Successfully.", data: finalData });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -222,10 +224,13 @@ const updateReview = async (req, res) => {
       { new: true }
     );
 
+     //Show Book-document with Updated-Review.
+     const finalData = { ...bookFound.toObject(), reviewsData: updatedReview };
+
     return res.status(200).send({
       status: true,
       message: "Review Updated Successfully.",
-      data: updatedReview,
+      data: finalData,
     });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -310,8 +315,8 @@ const deleteReviewById = async (req, res) => {
     return res.status(200).send({
       status: true,
       message: "Review Deleted Successfully.",
-      data: reviewFound,
     });
+    // data: reviewFound,
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }

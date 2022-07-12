@@ -1,5 +1,3 @@
-// const mongoose = require("mongoose");
-const moment = require("moment");
 const booksModel = require("../models/booksModel");
 const userModel = require("../models/userModel");
 const validator = require("../utils/validator");
@@ -292,7 +290,7 @@ const getBookById = async (req, res) => {
 
     //Find all Reviews for <bookId>.
     const reviewsFound = await reviewsModel
-      .find({ bookId: bookId })
+      .find({ bookId: bookId, isDeleted: false })
       .select({ __v: 0, isDeleted: 0 });
 
     //Find Book by <bookId>.
@@ -497,8 +495,8 @@ const deleteBookById = async (req, res) => {
     return res.status(200).send({
       status: true,
       message: "Deleted Book Successfully.",
-      requestBody: bookDeleted,
     });
+    // data: bookDeleted,
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
