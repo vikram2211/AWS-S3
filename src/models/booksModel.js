@@ -3,6 +3,11 @@ const ObjectId = mongoose.Schema.Types.ObjectId;
 
 const booksSchema = new mongoose.Schema(
   {
+    bookCover: {
+      type: String, //Stores URL of Uploaded File.
+      trim: true,
+    },
+
     title: {
       type: String,
       required: true,

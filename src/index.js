@@ -1,10 +1,17 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const route = require("./routes/route");
 
+// Require <MULTER> for Multi-part form-data (to get files).
+const multer = require("multer");
+const { AppConfig } = require("aws-sdk");
+
+const route = require("./routes/route");
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); //URLENCODED - TO Parse Form-Data.
+
+app.use(multer().any()); // <any> type of File will be accepted/parsed.
 
 mongoose
   .connect(

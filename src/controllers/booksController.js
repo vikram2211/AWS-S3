@@ -3,6 +3,9 @@ const userModel = require("../models/userModel");
 const reviewsModel = require("../models/reviewsModel");
 const validator = require("../utils/validator");
 
+// Import <uploadFile> Function of awsS3.js Local Module.
+const { uploadFile } = require("../aws/awsS3");
+
 /*--------------------------------------------------------------------------------*/
 //                            1. API - Create a Book.
 /*--------------------------------------------------------------------------------*/
@@ -18,6 +21,7 @@ const createBook = async (req, res) => {
       });
     }
 
+    // Request-Body: Object Destructuring.
     const { title, excerpt, userId, ISBN, category, subcategory, releasedAt } =
       requestBody;
 
@@ -59,7 +63,7 @@ const createBook = async (req, res) => {
     if (!validator.isValidISBN(ISBN)) {
       return res.status(400).send({
         status: false,
-        message: "Please enter a Valid ISBN(length 13 Digits ONLY).",
+        message: "Please enter a Valid ISBN(length <10> OR <13> Digits ONLY).",
       });
     }
     const ISBNUnique = await booksModel.findOne({ ISBN: ISBN });
@@ -153,15 +157,29 @@ const createBook = async (req, res) => {
       });
     }
 
-    //Create Book Document.
-    const bookData = await booksModel.create(requestBody);
-    return res
-      .status(201)
-      .send({
-        status: true,
-        message: "Book Successfully Created.",
-        requestBody: bookData,
+    // Get <File> for Book-Cover from Request's Form-Data.
+    let files = req.files;
+    if (files && files.length > 0) {
+      // Upload to AWS-S3 and get the Uploaded URL.
+      let uploadedFileURL = await uploadFile(files[0]);
+      // Store URL of Uploaded-File in <bookCover> KEY of Request Body.
+      requestBody.bookCover = uploadedFileURL;
+    }
+    // ERROR: If No File Provided.
+    else {
+      return res.status(400).send({
+        status: false,
+        message: "No File Found (in Request's Form-data).",
       });
+    }
+
+    //Create Book Document from <requestBody> Object(Variable).
+    const bookData = await booksModel.create(requestBody);
+    return res.status(201).send({
+      status: true,
+      message: "Book Successfully Created.",
+      data: bookData,
+    });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
   }
@@ -170,6 +188,7 @@ const createBook = async (req, res) => {
 /*--------------------------------------------------------------------------------*/
 //                            2. API - GET BOOKS.
 /*--------------------------------------------------------------------------------*/
+
 const getBooks = async (req, res) => {
   try {
     //Object Destructuring.
@@ -256,7 +275,7 @@ const getBooks = async (req, res) => {
     return res.status(200).send({
       status: true,
       message: "Found All Books according to Queries, Successfully.",
-      requestBody: allBooks,
+      data: allBooks,
     });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -299,7 +318,7 @@ const getBookById = async (req, res) => {
     return res.status(200).send({
       status: true,
       message: "Book Found Successfully.",
-      requestBody: finalData,
+      data: finalData,
     });
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message });
@@ -368,7 +387,8 @@ const updateBookById = async (req, res) => {
       if (!validator.isValidISBN(ISBN)) {
         return res.status(400).send({
           status: false,
-          message: "Invalid ISBN: length 13 Digits ONLY.",
+          message:
+            "Please enter a Valid ISBN(length <10> OR <13> Digits ONLY).",
         });
       }
     }
@@ -427,7 +447,7 @@ const updateBookById = async (req, res) => {
     res.status(200).send({
       status: true,
       message: "Successfully updated book details.",
-      requestBody: changeDetails,
+      data: changeDetails,
     });
   } catch (err) {
     return res.status(500).send({ status: false, Error: err.message });
